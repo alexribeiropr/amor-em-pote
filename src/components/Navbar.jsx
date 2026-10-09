@@ -19,11 +19,11 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
         {/* Brand Logo */}
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-[#E85D88] to-[#FDE8EF] flex items-center justify-center shadow-md shadow-[#E85D88]/20 group-hover:scale-105 transition-all duration-300">
-            <span className="text-2xl sm:text-3xl select-none transform group-hover:rotate-6 transition-transform">🍰</span>
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-[#E86A8D]/40 shadow-md shadow-[#E86A8D]/20 group-hover:scale-105 transition-all duration-300 bg-white shrink-0 p-0.5">
+            <img src="/logo.jpg" alt="Amor em Pote" className="w-full h-full object-cover rounded-full" />
           </div>
           <div>
-            <span className="font-pacifico text-2xl sm:text-3xl text-[#2C1810] tracking-wide block leading-none">
+            <span className="font-pacifico text-2xl sm:text-3xl text-[#3D2314] tracking-wide block leading-none">
               Amor em Pote
             </span>
             <span className="text-[10px] sm:text-[11px] font-black text-[#A05A36] tracking-[0.2em] uppercase mt-0.5 block">

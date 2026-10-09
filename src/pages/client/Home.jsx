@@ -95,30 +95,42 @@ export default function Home() {
       {/* Hero Banner Section */}
       <section className="relative overflow-hidden bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#FDF2F4] via-[#FFFDF9] to-[#FFFDF9] pt-8 sm:pt-12 pb-12 sm:pb-16 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          {/* Status Badges */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/90 backdrop-blur-xs border border-[#F2E5D9] text-[#E85D88] text-xs font-bold shadow-xs">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Produção Diária & Artesanal</span>
+          {/* Logo Badge & Tagline */}
+          <div className="flex flex-col items-center justify-center mb-6">
+            <div className="relative group mb-3">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-white shadow-xl shadow-[#E86A8D]/25 ring-4 ring-[#FAD2DF]/60 bg-white">
+                <img src="/logo.jpg" alt="Logo Amor em Pote" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+              </div>
+              <span className="absolute -bottom-1 -right-1 bg-white border border-[#FAD2DF] text-xs px-2 py-0.5 rounded-full shadow-xs font-bold text-[#A8325B] flex items-center gap-1">
+                <span>❤️</span> Feito com amor
+              </span>
             </div>
 
-            {/* Store Status Indicator */}
-            <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black shadow-xs ${
-              settings.isOpen !== false
-                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                : 'bg-rose-50 text-rose-800 border border-rose-200'
-            }`}>
-              <span className={`w-2 h-2 rounded-full ${settings.isOpen !== false ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
-              <span>{settings.isOpen !== false ? `Aberto agora • ${settings.businessHours || '13:00 às 21:00'}` : (settings.closedMessage || 'Fechado temporariamente')}</span>
+            {/* Badges */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/95 backdrop-blur-xs border border-[#FAD2DF] text-[#A8325B] text-xs font-black shadow-xs">
+                <Sparkles className="w-3.5 h-3.5 text-[#E86A8D]" />
+                <span>Qualidade em cada pote • Sabor que faz bem!</span>
+              </div>
+
+              {/* Store Status Indicator */}
+              <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black shadow-xs ${
+                settings.isOpen !== false
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                  : 'bg-rose-50 text-rose-800 border border-rose-200'
+              }`}>
+                <span className={`w-2 h-2 rounded-full ${settings.isOpen !== false ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                <span>{settings.isOpen !== false ? `Aberto agora • ${settings.businessHours || '13:00 às 21:00'}` : (settings.closedMessage || 'Fechado temporariamente')}</span>
+              </div>
             </div>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-[#2C1810] tracking-tight leading-[1.15] mb-4">
-            A vida fica mais doce com um <span className="font-pacifico text-[#E85D88] drop-shadow-xs">Bolo no Pote</span>! 🍰
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-[#3D2314] tracking-tight leading-[1.15] mb-3">
+            Mais que doces, <span className="font-pacifico text-[#A8325B] drop-shadow-xs">momentos especiais!</span> 💕
           </h1>
 
-          <p className="text-[#7C4A2D] text-sm sm:text-base max-w-xl mx-auto font-medium leading-relaxed">
-            Camadas generosas de massa fofinha, recheios trufados aveludados e coberturas especiais. Escolha seus sabores favoritos e receba fresquinho!
+          <p className="text-[#6B3A2A] text-sm sm:text-base max-w-xl mx-auto font-medium leading-relaxed">
+            Doces artesanais preparados com ingredientes selecionados e carinho de verdade. Escolha seus sabores favoritos e peça direto no WhatsApp!
           </p>
 
           {/* Search bar */}

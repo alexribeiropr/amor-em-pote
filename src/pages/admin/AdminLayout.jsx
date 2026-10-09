@@ -72,8 +72,8 @@ export default function AdminLayout() {
       <header className="bg-white/95 backdrop-blur-md border-b border-[#F2E5D9] sticky top-0 z-30 shadow-[0_2px_15px_-3px_rgba(66,32,16,0.03)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#2C1810] text-white flex items-center justify-center font-bold text-xl shadow-md">
-              🧑🍳
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-[#E86A8D]/40 shadow-md bg-white shrink-0 p-0.5">
+              <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover rounded-full" />
             </div>
             <div>
               <span className="font-black text-base sm:text-lg text-[#2C1810] block leading-tight">

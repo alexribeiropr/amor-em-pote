@@ -47,8 +47,8 @@ export default function AdminLogin() {
     <div className="min-h-screen flex items-center justify-center px-4 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#FDF2F4] via-[#FFFDF9] to-[#FFFDF9]">
       <div className="max-w-md w-full bg-white rounded-3xl p-8 sm:p-10 border border-[#F2E5D9] shadow-cake space-y-6">
         <div className="text-center space-y-3">
-          <div className="w-20 h-20 bg-gradient-to-tr from-[#E85D88] to-[#FDE8EF] rounded-3xl flex items-center justify-center mx-auto text-4xl shadow-md shadow-[#E85D88]/20">
-            🧑🍳
+          <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-xl shadow-[#E86A8D]/25 ring-4 ring-[#FAD2DF]/60 bg-white mx-auto">
+            <img src="/logo.jpg" alt="Logo Amor em Pote" className="w-full h-full object-cover" />
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-[#2C1810]">

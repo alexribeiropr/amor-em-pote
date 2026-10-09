@@ -28,15 +28,20 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-10 border-b border-[#5C3826]">
           {/* Brand & Concept */}
           <div className="space-y-3 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-2">
-              <span className="text-3xl">🍰</span>
-              <span className="font-pacifico text-2xl text-white">Amor em Pote</span>
+            <div className="flex items-center justify-center md:justify-start gap-3">
+              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#E86A8D]/50 shadow-md bg-white shrink-0">
+                <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <span className="font-pacifico text-2xl text-white block leading-none">Amor em Pote</span>
+                <span className="text-[10px] text-[#F7EFE5]/70 uppercase tracking-widest font-black">Doces Artesanais</span>
+              </div>
             </div>
             <p className="text-sm text-[#F7EFE5]/80 leading-relaxed">
-              Doces artesanais preparados diariamente com amor, carinho e ingredientes de primeiríssima qualidade. Peça e adoce seu dia!
+              Mais que doces, momentos especiais! Feitos com carinho, qualidade em cada pote e sabor que faz bem.
             </p>
             <div className="flex items-center justify-center md:justify-start gap-1 text-xs text-[#E86A8D] font-bold">
-              <span>Feito artesanalmente para você</span>
+              <span>Feitos com carinho</span>
               <Heart className="w-3.5 h-3.5 fill-[#E86A8D]" />
             </div>
           </div>
