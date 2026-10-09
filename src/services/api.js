@@ -198,6 +198,7 @@ function setLocalStore(data) {
 let backendAvailable = true;
 
 async function request(endpoint, options = {}) {
+  // If backend is deemed available, try calling /api
   if (backendAvailable) {
     try {
       const res = await fetch(`/api${endpoint}`, {
@@ -207,19 +208,18 @@ async function request(endpoint, options = {}) {
         },
         ...options
       });
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Erro HTTP ${res.status}`);
-      }
-      return await res.json();
-    } catch (err) {
-      // If network failed (e.g. backend not running on port 3001)
-      if (err.name === 'TypeError' || err.message.includes('Failed to fetch')) {
-        console.warn('Backend Express não detectado. Usando armazenamento local (LocalStorage).');
+
+      // If backend returns 404 or HTML (e.g. Vercel static rewrite), gracefully fall back to LocalStorage!
+      const contentType = res.headers.get('content-type') || '';
+      if (!res.ok || !contentType.includes('application/json')) {
+        console.warn(`Endpoint /api${endpoint} respondeu status ${res.status} ou não é JSON. Ativando modo local independente.`);
         backendAvailable = false;
       } else {
-        throw err;
+        return await res.json();
       }
+    } catch (err) {
+      console.warn('Backend Express não detectado. Usando armazenamento local (LocalStorage).', err.message);
+      backendAvailable = false;
     }
   }
 
