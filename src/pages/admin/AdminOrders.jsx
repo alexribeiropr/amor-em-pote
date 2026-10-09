@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageCircle, CheckCircle, Clock, Truck, CheckCheck, XCircle, MapPin, Receipt, Phone, AlertCircle, Sparkles, Filter } from 'lucide-react';
+import { MessageCircle, CheckCircle, Clock, Truck, CheckCheck, XCircle, MapPin, Receipt, Phone, AlertCircle, Sparkles, Filter, Trash2 } from 'lucide-react';
 import { api } from '../../services/api';
 
 const STATUS_FILTERS = ['Todos', 'Novo', 'Em preparo', 'Enviado', 'Entregue', 'Cancelado'];
@@ -42,6 +42,28 @@ export default function AdminOrders() {
 
   const formatBRL = (val) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
+  };
+
+  const handleDeleteOrder = async (orderId) => {
+    if (!window.confirm(`Excluir permanentemente o pedido #${orderId}?`)) return;
+    try {
+      await api.deleteOrder(orderId);
+      await loadOrders();
+      showToast(`Pedido #${orderId} excluído com sucesso!`);
+    } catch (err) {
+      showToast(err.message || 'Erro ao excluir pedido', 'error');
+    }
+  };
+
+  const handleClearAllOrders = async () => {
+    if (!window.confirm('Tem certeza que deseja apagar TODOS os pedidos do histórico? Essa ação não pode ser desfeita.')) return;
+    try {
+      await api.clearAllOrders();
+      await loadOrders();
+      showToast('Todos os pedidos foram apagados!');
+    } catch (err) {
+      showToast(err.message || 'Erro ao limpar pedidos', 'error');
+    }
   };
 
   const handleStatusChange = async (orderId, newStatus) => {
@@ -128,6 +150,16 @@ Já estamos cuidando de tudo para que seu bolo de pote chegue fresquinho e delic
           <span className="text-xs font-black text-[#7C4A2D] bg-white border border-[#F2E5D9] px-4 py-2 rounded-2xl shadow-xs">
             Total de Pedidos: {orders.length}
           </span>
+          {orders.length > 0 && (
+            <button
+              onClick={handleClearAllOrders}
+              className="inline-flex items-center gap-1.5 text-xs font-black text-rose-700 hover:text-rose-900 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3.5 py-2 rounded-2xl transition-all shadow-xs"
+              title="Apagar todos os pedidos de teste"
+            >
+              <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+              <span>Limpar Pedidos</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -210,13 +242,22 @@ Já estamos cuidando de tudo para que seu bolo de pote chegue fresquinho e delic
                       </span>
                     </div>
 
-                    <div className="text-right">
-                      <span className="text-lg font-black text-[#E85D88]">
-                        {formatBRL(order.total)}
-                      </span>
-                      <span className="text-[10px] block font-bold text-[#7C4A2D]">
-                        {order.paymentMethod}
-                      </span>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <span className="text-lg font-black text-[#E85D88]">
+                          {formatBRL(order.total)}
+                        </span>
+                        <span className="text-[10px] block font-bold text-[#7C4A2D]">
+                          {order.paymentMethod}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteOrder(order.id)}
+                        className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                        title="Excluir este pedido"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
 

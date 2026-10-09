@@ -77,95 +77,8 @@ const defaultSeed = {
       category: 'Tradicionais'
     }
   ],
-  orders: [
-    {
-      id: 'PED-1001',
-      createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-      customer: {
-        name: 'Mariana Souza',
-        phone: '11987654321',
-        street: 'Rua das Flores',
-        number: '124',
-        neighborhood: 'Jardim Primavera',
-        complement: 'Apto 42',
-        reference: 'Próximo à padaria'
-      },
-      paymentMethod: 'PIX',
-      notes: 'Por favor, caprichar no guardanapo e colher.',
-      items: [
-        { productId: 'p1', name: 'Ninho com Nutella', quantity: 2, price: 14.50 },
-        { productId: 'p3', name: 'Morango com Brigadeiro Branco', quantity: 1, price: 15.00 }
-      ],
-      subtotal: 44.00,
-      deliveryFee: 5.00,
-      total: 49.00,
-      status: 'Entregue'
-    },
-    {
-      id: 'PED-1002',
-      createdAt: new Date(Date.now() - 3600000).toISOString(),
-      customer: {
-        name: 'Lucas Ferreira',
-        phone: '11976543210',
-        street: 'Av. Paulista',
-        number: '1500',
-        neighborhood: 'Bela Vista',
-        complement: 'Conjunto 81',
-        reference: 'Em frente ao MASP'
-      },
-      paymentMethod: 'Cartão',
-      notes: '',
-      items: [
-        { productId: 'p2', name: 'Cenoura com Brigadeiro Belga', quantity: 1, price: 13.00 }
-      ],
-      subtotal: 13.00,
-      deliveryFee: 5.00,
-      total: 18.00,
-      status: 'Em preparo'
-    }
-  ],
-  stockHistory: [
-    {
-      id: 'hist-1',
-      timestamp: new Date(Date.now() - 86400000).toISOString(),
-      type: 'ENTRY',
-      productId: 'p1',
-      productName: 'Ninho com Nutella',
-      quantityDelta: 15,
-      newStock: 15,
-      reason: 'Produção inicial de fornada'
-    },
-    {
-      id: 'hist-2',
-      timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
-      type: 'EXIT',
-      productId: 'p1',
-      productName: 'Ninho com Nutella',
-      quantityDelta: -2,
-      newStock: 13,
-      reason: 'Venda - Pedido #PED-1001'
-    },
-    {
-      id: 'hist-3',
-      timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
-      type: 'EXIT',
-      productId: 'p3',
-      productName: 'Morango com Brigadeiro Branco',
-      quantityDelta: -1,
-      newStock: 4,
-      reason: 'Venda - Pedido #PED-1001'
-    },
-    {
-      id: 'hist-4',
-      timestamp: new Date(Date.now() - 3600000).toISOString(),
-      type: 'EXIT',
-      productId: 'p2',
-      productName: 'Cenoura com Brigadeiro Belga',
-      quantityDelta: -1,
-      newStock: 8,
-      reason: 'Venda - Pedido #PED-1002'
-    }
-  ]
+  orders: [],
+  stockHistory: []
 };
 
 function getLocalStore() {
@@ -430,6 +343,31 @@ async function request(endpoint, options = {}) {
     return { success: true, order };
   }
 
+  // Delete single order
+  if (endpoint.startsWith('/orders/') && options.method === 'DELETE') {
+    const id = endpoint.split('/')[2];
+    const index = store.orders.findIndex(o => o.id === id);
+    if (index === -1) throw new Error('Pedido não encontrado');
+    const removed = store.orders.splice(index, 1)[0];
+    setLocalStore(store);
+    return { success: true, removed };
+  }
+
+  // Delete all orders
+  if (endpoint === '/orders' && options.method === 'DELETE') {
+    store.orders = [];
+    setLocalStore(store);
+    return { success: true };
+  }
+
+  // Clear demo data (orders and history)
+  if (endpoint === '/clean-data' && options.method === 'POST') {
+    store.orders = [];
+    store.stockHistory = [];
+    setLocalStore(store);
+    return { success: true };
+  }
+
   // Dashboard Stats
   if (endpoint === '/dashboard' && (!options.method || options.method === 'GET')) {
     const now = new Date();
@@ -495,10 +433,15 @@ export const api = {
     method: 'PATCH',
     body: JSON.stringify({ status })
   }),
+  deleteOrder: (id) => request(`/orders/${id}`, { method: 'DELETE' }),
+  clearAllOrders: () => request('/orders', { method: 'DELETE' }),
 
   // Dashboard & Audit
   getDashboard: () => request('/dashboard'),
   getStockHistory: () => request('/stock-history'),
+
+  // Clear demo fake data (orders and history)
+  clearDemoData: () => request('/clean-data', { method: 'POST' }),
 
   // Reset to default seed data if needed
   resetData: () => {

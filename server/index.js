@@ -491,6 +491,35 @@ app.patch('/api/orders/:id/status', (req, res) => {
   res.json({ success: true, order });
 });
 
+// 9.1 DELETE single order
+app.delete('/api/orders/:id', (req, res) => {
+  const data = loadData();
+  const index = data.orders.findIndex(o => o.id === req.params.id);
+  if (index === -1) {
+    return res.status(404).json({ error: 'Pedido não encontrado' });
+  }
+  const removed = data.orders.splice(index, 1)[0];
+  saveData(data);
+  res.json({ success: true, removed });
+});
+
+// 9.2 DELETE all orders (Limpar histórico)
+app.delete('/api/orders', (req, res) => {
+  const data = loadData();
+  data.orders = [];
+  saveData(data);
+  res.json({ success: true, message: 'Todos os pedidos foram apagados.' });
+});
+
+// 9.3 Clear all demo data
+app.post('/api/clean-data', (req, res) => {
+  const data = loadData();
+  data.orders = [];
+  data.stockHistory = [];
+  saveData(data);
+  res.json({ success: true, message: 'Dados de pedidos e histórico limpos.' });
+});
+
 // 10. GET Dashboard Stats
 app.get('/api/dashboard', (req, res) => {
   const data = loadData();

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, KeyRound, Phone, Store, DollarSign, Clock, Check, AlertCircle, RefreshCw, Tag, Plus, X, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Save, KeyRound, Phone, Store, DollarSign, Clock, Check, AlertCircle, RefreshCw, Tag, Plus, X, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react';
 import { api } from '../../services/api';
 
 export default function AdminSettings() {
@@ -101,6 +101,18 @@ export default function AdminSettings() {
       setTimeout(() => setSaved(false), 3500);
     } catch (err) {
       setErrorMessage(err.message || 'Erro ao salvar configurações');
+    }
+  };
+
+  const handleCleanDemoData = async () => {
+    if (window.confirm('Deseja apagar todos os pedidos de teste e o histórico fictício? Seus produtos reais e configurações serão mantidos intactos.')) {
+      try {
+        await api.clearDemoData();
+        alert('Histórico de pedidos fictícios apagado com sucesso! A loja agora está pronta para suas vendas reais.');
+        window.location.reload();
+      } catch (err) {
+        alert('Erro ao limpar dados: ' + (err.message || 'Falha ao processar'));
+      }
     }
   };
 
@@ -367,14 +379,26 @@ export default function AdminSettings() {
           </div>
 
           <div className="pt-4 border-t border-[#F5E6DC] flex flex-col sm:flex-row items-center justify-between gap-4">
-            <button
-              type="button"
-              onClick={handleResetDemo}
-              className="text-xs font-bold text-gray-500 hover:text-[#3D2314] flex items-center gap-1.5"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>Restaurar dados de demonstração iniciais</span>
-            </button>
+            <div className="flex flex-wrap items-center gap-4">
+              <button
+                type="button"
+                onClick={handleCleanDemoData}
+                className="text-xs font-black text-rose-600 hover:text-rose-800 flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-2 rounded-xl transition-colors"
+                title="Apagar pedidos de exemplo e zerar histórico para começar a usar de verdade"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Apagar Pedidos Fictícios (Zerar Loja)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResetDemo}
+                className="text-xs font-bold text-gray-500 hover:text-[#3D2314] flex items-center gap-1.5"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Restaurar dados de demonstração</span>
+              </button>
+            </div>
 
             <button
               type="submit"
