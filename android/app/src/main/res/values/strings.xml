@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Amor em Pote</string>
+    <string name="title_activity_main">Amor em Pote</string>
+    <string name="package_name">com.amorpote.app</string>
+    <string name="custom_url_scheme">com.amorpote.app</string>
+</resources>

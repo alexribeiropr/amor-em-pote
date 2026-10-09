@@ -1,0 +1,24 @@
+{
+  "name": "Amor em Pote - Doces Artesanais",
+  "short_name": "Amor em Pote",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFDF9",
+  "theme_color": "#E85D88",
+  "orientation": "portrait",
+  "description": "Cardápio e pedidos de bolos no pote artesanais",
+  "icons": [
+    {
+      "src": "/cake-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/cake-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
