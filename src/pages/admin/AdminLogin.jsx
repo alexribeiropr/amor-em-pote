@@ -38,7 +38,7 @@ export default function AdminLogin() {
       sessionStorage.setItem('amor_admin_auth', 'true');
       navigate('/admin/dashboard');
     } else {
-      setError('Senha incorreta. A senha padrão inicial é "admin123".');
+      setError('Senha incorreta. Tente novamente.');
     }
     setLoading(false);
   };
@@ -69,9 +69,8 @@ export default function AdminLogin() {
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-xs font-black text-[#7C4A2D] mb-2 flex items-center justify-between">
-              <span>Senha de Acesso</span>
-              <span className="text-[10px] text-[#A05A36] font-medium">Padrão: admin123</span>
+            <label className="block text-xs font-black text-[#7C4A2D] mb-2">
+              Senha de Acesso
             </label>
             <div className="relative">
               <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A05A36]" />

@@ -142,20 +142,22 @@ export default function Home() {
           </div>
 
           {/* Category Pills Slider */}
-          <div className="flex items-center justify-center gap-2 mt-6 overflow-x-auto pb-2 no-scrollbar px-2">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 sm:px-5 py-2 rounded-2xl text-xs sm:text-sm font-extrabold transition-all duration-200 shrink-0 ${
-                  selectedCategory === cat
-                    ? 'bg-[#E85D88] text-white shadow-md shadow-[#E85D88]/30 scale-105'
-                    : 'bg-white text-[#7C4A2D] hover:bg-[#FDF2F4] hover:text-[#2C1810] border border-[#F2E5D9] shadow-xs'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          <div className="w-full overflow-x-auto pb-3 pt-1 px-4 no-scrollbar">
+            <div className="flex items-center justify-start sm:justify-center gap-2 min-w-max mx-auto">
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-4 sm:px-5 py-2 rounded-2xl text-xs sm:text-sm font-extrabold transition-all duration-200 shrink-0 ${
+                    selectedCategory === cat
+                      ? 'bg-[#E85D88] text-white shadow-md shadow-[#E85D88]/30 scale-105'
+                      : 'bg-white text-[#7C4A2D] hover:bg-[#FDF2F4] hover:text-[#2C1810] border border-[#F2E5D9] shadow-xs'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </section>
