@@ -390,93 +390,17 @@ export default function AdminSettings() {
           </div>
         </div>
 
-        {/* SEÇÃO 4: CONEXÃO COM BANCO DE DADOS EM NUVEM (SUPABASE) */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#F5E6DC] shadow-sm space-y-5">
-          <div className="flex items-center justify-between pb-3 border-b border-[#F5E6DC]">
-            <div className="flex items-center gap-2">
-              <Database className="w-5 h-5 text-[#E86A8D]" />
-              <div>
-                <h2 className="font-extrabold text-base text-[#3D2314]">
-                  Banco de Dados em Nuvem (Supabase) ☁️
-                </h2>
-                <p className="text-xs text-[#8C5338]">
-                  Sincronização em tempo real para que qualquer cliente veja as alterações do cardápio instantaneamente
-                </p>
-              </div>
-            </div>
-
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black ${
-              supabaseConnected
-                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                : 'bg-amber-50 text-amber-800 border border-amber-200'
-            }`}>
-              <span className={`w-2 h-2 rounded-full ${supabaseConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
-              <span>{supabaseConnected ? 'Nuvem Conectada' : 'Modo Offline / Local'}</span>
-            </span>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-[#FFFDF9] border border-[#F5E6DC] text-xs text-[#6B3A2A] space-y-2">
-            <p className="font-bold flex items-center gap-1.5 text-[#3D2314]">
-              <Globe className="w-4 h-4 text-[#E86A8D]" />
-              <span>Como conectar seu Supabase gratuito:</span>
-            </p>
-            <ol className="list-decimal pl-4 space-y-1">
-              <li>Crie um projeto grátis no <strong>supabase.com</strong>.</li>
-              <li>Vá em <strong>SQL Editor</strong> e execute o script disponibilizado em <code>supabase-schema.sql</code>.</li>
-              <li>Em <strong>Project Settings ➔ API</strong>, copie a <strong>Project URL</strong> e a <strong>anon key</strong> e cole abaixo.</li>
-            </ol>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-[#8C5338] mb-1.5">
-                Supabase Project URL
-              </label>
-              <input
-                type="text"
-                value={supabaseUrl}
-                onChange={(e) => setSupabaseUrl(e.target.value)}
-                placeholder="https://xyzcompany.supabase.co"
-                className="w-full px-4 py-2.5 rounded-xl border border-[#F5E6DC] text-sm focus:outline-none focus:ring-2 focus:ring-[#E86A8D]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[#8C5338] mb-1.5">
-                Supabase Anon / Public Key
-              </label>
-              <input
-                type="password"
-                value={supabaseAnonKey}
-                onChange={(e) => setSupabaseAnonKey(e.target.value)}
-                placeholder="eyJhbGciOiJIUzI1NiIsInR5..."
-                className="w-full px-4 py-2.5 rounded-xl border border-[#F5E6DC] text-sm focus:outline-none focus:ring-2 focus:ring-[#E86A8D]"
-              />
-            </div>
-          </div>
-        </div>
-
         <div className="bg-white rounded-3xl p-6 border border-[#F5E6DC] shadow-sm">
-            <div className="flex flex-wrap items-center gap-4">
-              <button
-                type="button"
-                onClick={handleCleanDemoData}
-                className="text-xs font-black text-rose-600 hover:text-rose-800 flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-2 rounded-xl transition-colors"
-                title="Apagar pedidos de exemplo e zerar histórico para começar a usar de verdade"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Apagar Pedidos Fictícios (Zerar Loja)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleResetDemo}
-                className="text-xs font-bold text-gray-500 hover:text-[#3D2314] flex items-center gap-1.5"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Restaurar dados de demonstração</span>
-              </button>
-            </div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <button
+              type="button"
+              onClick={handleCleanDemoData}
+              className="text-xs font-black text-rose-600 hover:text-rose-800 flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3.5 py-2.5 rounded-xl transition-colors"
+              title="Zerar todos os pedidos e histórico"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Limpar Pedidos & Zerar Loja</span>
+            </button>
 
             <button
               type="submit"
@@ -486,7 +410,8 @@ export default function AdminSettings() {
               <span>Salvar Todas as Configurações</span>
             </button>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
+    </div>
   );
 }

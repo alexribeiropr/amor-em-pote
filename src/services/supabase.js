@@ -1,8 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Prioridade: variáveis .env (Vite) ou chaves salvas pelo admin no painel
-const getUrl = () => import.meta.env.VITE_SUPABASE_URL || localStorage.getItem('amor_supabase_url') || '';
-const getKey = () => import.meta.env.VITE_SUPABASE_ANON_KEY || localStorage.getItem('amor_supabase_anon_key') || '';
+const DEFAULT_URL = 'https://sioyhnzrsnwkfukskpzn.supabase.co';
+const DEFAULT_KEY = 'sb_publishable_XYUdRwcqF7ayvn193-zAqw_8iuku5ui';
+
+const getUrl = () => import.meta.env.VITE_SUPABASE_URL || localStorage.getItem('amor_supabase_url') || DEFAULT_URL;
+const getKey = () => import.meta.env.VITE_SUPABASE_ANON_KEY || localStorage.getItem('amor_supabase_anon_key') || DEFAULT_KEY;
 
 let clientInstance = null;
 

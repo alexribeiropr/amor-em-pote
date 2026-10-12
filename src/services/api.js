@@ -5,7 +5,7 @@ const LOCAL_STORAGE_KEY = 'amor_em_pote_data_v1';
 const defaultSeed = {
   settings: {
     storeName: 'Amor em Pote - Doces Artesanais',
-    sellerPhone: '5511999998888',
+    sellerPhone: '24999762118',
     adminPassword: 'admin123',
     pixKey: 'contato@amorpote.com.br',
     deliveryFee: 5.00,
@@ -15,68 +15,7 @@ const defaultSeed = {
     closedMessage: 'Segunda-feira: Fechado para produção artesanal',
     categories: ['Tradicionais', 'Especiais', 'Premium', 'Frutas']
   },
-  products: [
-    {
-      id: 'p1',
-      name: 'Ninho com Nutella',
-      description: 'Massa fofinha de chocolate, recheio cremoso de leite Ninho e pura Nutella original.',
-      price: 14.50,
-      stock: 12,
-      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80',
-      active: true,
-      category: 'Tradicionais'
-    },
-    {
-      id: 'p2',
-      name: 'Cenoura com Brigadeiro Belga',
-      description: 'Bolo de cenoura caseiro ultra macio, coberto com generosas camadas de brigadeiro 50% cacau.',
-      price: 13.00,
-      stock: 8,
-      image: 'https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&w=600&q=80',
-      active: true,
-      category: 'Tradicionais'
-    },
-    {
-      id: 'p3',
-      name: 'Morango com Brigadeiro Branco',
-      description: 'Pedaços frescos de morango, creme branco aveludado e pão de ló amanteigado.',
-      price: 15.00,
-      stock: 4,
-      image: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=600&q=80',
-      active: true,
-      category: 'Especiais'
-    },
-    {
-      id: 'p4',
-      name: 'Red Velvet com Cream Cheese',
-      description: 'Massa aveludada vermelha com clássico recheio suave de cream cheese cítrico.',
-      price: 16.00,
-      stock: 3,
-      image: 'https://images.unsplash.com/photo-1586788680434-30d324b2d46f?auto=format&fit=crop&w=600&q=80',
-      active: true,
-      category: 'Premium'
-    },
-    {
-      id: 'p5',
-      name: 'Maracujá Cremoso com Chocolate',
-      description: 'Equilíbrio perfeito do mousse de maracujá artesanal com ganache de chocolate meio amargo.',
-      price: 14.00,
-      stock: 6,
-      image: 'https://images.unsplash.com/photo-1535141192574-5d4897c13136?auto=format&fit=crop&w=600&q=80',
-      active: true,
-      category: 'Frutas'
-    },
-    {
-      id: 'p6',
-      name: 'Prestígio Trufado',
-      description: 'Bolo de chocolate molhadinho recheado com beijinho de coco úmido e raspas de coco ralado.',
-      price: 13.50,
-      stock: 0,
-      image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=600&q=80',
-      active: true,
-      category: 'Tradicionais'
-    }
-  ],
+  products: [],
   orders: [],
   stockHistory: []
 };
