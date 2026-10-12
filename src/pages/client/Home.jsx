@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Search, Sparkles, Check, AlertCircle, Plus, Minus, Info, X, Heart } from 'lucide-react';
+import { ShoppingBag, Search, Sparkles, Check, AlertCircle, Plus, Minus, Info, X, Heart, Download, Smartphone } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { api } from '../../services/api';
 import { Link } from 'react-router-dom';
@@ -16,12 +16,41 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [notification, setNotification] = useState(null);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [isAppInstalled, setIsAppInstalled] = useState(false);
 
   const { cart, addToCart, updateQuantity, totalItems, subtotal } = useCart();
 
   useEffect(() => {
     loadData();
+
+    // Listen for PWA install event
+    const handleBeforeInstall = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsAppInstalled(true);
+    }
+
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
   }, []);
+
+  const handleInstallClick = async () => {
+    if (!installPrompt) {
+      alert('Para instalar o aplicativo no seu celular:\n\n1. No Chrome: Toque nos 3 pontinhos no canto superior e selecione "Instalar aplicativo" ou "Adicionar à tela inicial".\n2. No iPhone (Safari): Toque no botão de Compartilhar e selecione "Adicionar à Tela de Início".');
+      return;
+    }
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setInstallPrompt(null);
+      setIsAppInstalled(true);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -112,6 +141,18 @@ export default function Home() {
                 <Sparkles className="w-3.5 h-3.5 text-[#E86A8D]" />
                 <span>Qualidade em cada pote • Sabor que faz bem!</span>
               </div>
+
+              {/* PWA Install Button Badge */}
+              {!isAppInstalled && (
+                <button
+                  onClick={handleInstallClick}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-[#E86A8D] to-[#FB7185] hover:from-[#C73866] hover:to-[#E86A8D] text-white text-xs font-black shadow-md shadow-[#E86A8D]/25 transition-all transform hover:scale-105 active:scale-95"
+                  title="Instalar no celular sem precisar de Play Store"
+                >
+                  <Download className="w-3.5 h-3.5 animate-bounce" />
+                  <span>Instalar no Celular</span>
+                </button>
+              )}
 
               {/* Store Status Indicator */}
               <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black shadow-xs ${
@@ -226,91 +267,91 @@ export default function Home() {
               return (
                 <div
                   key={product.id}
-                  className={`group bg-white rounded-3xl border border-[#F2E5D9] overflow-hidden shadow-cake hover:shadow-cake-hover hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between ${
-                    isOutOfStock ? 'opacity-75' : ''
+                  className={`group bg-white rounded-3xl border border-[#F2E5D9] overflow-hidden shadow-cake hover:shadow-cake-hover hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between ${
+                    isOutOfStock ? 'opacity-70 bg-stone-50/50' : ''
                   }`}
                 >
                   {/* Photo Container */}
-                  <div className="relative h-56 sm:h-60 w-full overflow-hidden bg-[#F9EFE7]">
+                  <div className="relative h-60 sm:h-64 w-full overflow-hidden bg-[#F9EFE7]">
                     <img
                       src={product.image}
                       alt={product.name}
                       onError={(e) => {
                         e.target.src = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80';
                       }}
-                      className={`w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108 ${
-                        isOutOfStock ? 'grayscale-[60%]' : ''
+                      className={`w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 ${
+                        isOutOfStock ? 'grayscale-[50%]' : ''
                       }`}
                     />
 
                     {/* Gradient Overlay bottom of photo */}
-                    <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                    <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/35 via-black/10 to-transparent pointer-events-none" />
 
                     {/* Category Pill Badge */}
-                    <span className="absolute top-3.5 left-3.5 bg-white/95 backdrop-blur-md text-[#7C4A2D] text-[11px] font-black px-3 py-1 rounded-full shadow-xs border border-white/60">
+                    <span className="absolute top-3.5 left-3.5 bg-white/95 backdrop-blur-md text-[#7C4A2D] text-[11px] font-black px-3.5 py-1.5 rounded-full shadow-sm border border-white/80">
                       {product.category || 'Tradicional'}
                     </span>
 
                     {/* Stock Status Badge */}
                     <div className="absolute top-3.5 right-3.5">
                       {isOutOfStock ? (
-                        <span className="bg-rose-600/95 text-white text-xs font-black px-3 py-1 rounded-full shadow-md flex items-center gap-1">
+                        <span className="bg-rose-600/95 backdrop-blur-md text-white text-xs font-black px-3.5 py-1.5 rounded-full shadow-md flex items-center gap-1">
                           <span>Esgotado</span>
                         </span>
                       ) : isLowStock ? (
-                        <span className="bg-gradient-to-r from-amber-500 to-rose-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-md flex items-center gap-1 animate-pulse">
+                        <span className="bg-gradient-to-r from-amber-500 to-rose-500 text-white text-xs font-black px-3.5 py-1.5 rounded-full shadow-md flex items-center gap-1 animate-pulse">
                           <span>Últimas {product.stock} un! 🔥</span>
                         </span>
                       ) : (
-                        <span className="bg-emerald-600/90 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-xs backdrop-blur-xs">
-                          {product.stock} un
+                        <span className="bg-emerald-600/95 backdrop-blur-md text-white text-[11px] font-black px-3 py-1.5 rounded-full shadow-xs">
+                          {product.stock} un disponíveis
                         </span>
                       )}
                     </div>
                   </div>
 
                   {/* Body Content */}
-                  <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="p-6 sm:p-7 flex-1 flex flex-col justify-between space-y-4">
                     <div>
-                      <h3 className="font-black text-lg text-[#2C1810] group-hover:text-[#E85D88] transition-colors leading-snug">
+                      <h3 className="font-black text-lg sm:text-xl text-[#2C1810] group-hover:text-[#E85D88] transition-colors leading-snug">
                         {product.name}
                       </h3>
-                      <p className="text-xs text-[#7C4A2D] mt-2 leading-relaxed line-clamp-2 font-medium">
+                      <p className="text-xs sm:text-sm text-[#7C4A2D] mt-2 leading-relaxed line-clamp-2 font-medium">
                         {product.description}
                       </p>
                     </div>
 
-                    <div className="pt-4 border-t border-[#F2E5D9]/70 flex items-center justify-between gap-3">
+                    <div className="pt-4 border-t border-[#F2E5D9]/80 flex items-center justify-between gap-3">
                       <div>
-                        <span className="text-[10px] uppercase font-bold text-[#A05A36] block tracking-wider">
-                          Valor
+                        <span className="text-[10px] uppercase font-black text-[#A05A36] block tracking-wider">
+                          Preço do Pote
                         </span>
-                        <span className="text-xl font-black text-[#2C1810]">
+                        <span className="text-2xl font-black text-[#2C1810] tracking-tight">
                           {formatBRL(product.price)}
                         </span>
                       </div>
 
                       {/* Add button / Counter */}
                       {isOutOfStock ? (
-                        <span className="px-4 py-2.5 rounded-2xl font-bold text-xs bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed">
-                          Esgotado
+                        <span className="px-4 py-2.5 rounded-2xl font-black text-xs bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed">
+                          Indisponível
                         </span>
                       ) : inCartQty > 0 ? (
                         <div className="flex items-center gap-1.5 bg-[#FDF2F4] border border-[#E85D88]/40 rounded-2xl p-1 shadow-xs">
                           <button
                             onClick={() => updateQuantity(product.id, inCartQty - 1, product.stock)}
-                            className="w-7 h-7 rounded-xl bg-white text-[#E85D88] hover:bg-[#E85D88] hover:text-white flex items-center justify-center transition-colors shadow-xs"
+                            className="w-8 h-8 rounded-xl bg-white text-[#E85D88] hover:bg-[#E85D88] hover:text-white flex items-center justify-center transition-colors shadow-xs"
                             title="Diminuir"
                           >
                             <Minus className="w-3.5 h-3.5" />
                           </button>
-                          <span className="w-6 text-center text-xs font-black text-[#2C1810]">
+                          <span className="w-7 text-center text-xs font-black text-[#2C1810]">
                             {inCartQty}
                           </span>
                           <button
                             onClick={() => updateQuantity(product.id, inCartQty + 1, product.stock)}
                             disabled={inCartQty >= product.stock}
-                            className={`w-7 h-7 rounded-xl flex items-center justify-center transition-colors shadow-xs ${
+                            className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors shadow-xs ${
                               inCartQty >= product.stock
                                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 : 'bg-white text-[#E85D88] hover:bg-[#E85D88] hover:text-white'
@@ -323,7 +364,7 @@ export default function Home() {
                       ) : (
                         <button
                           onClick={() => handleAddToCart(product)}
-                          className="px-4 py-2.5 rounded-2xl font-black text-xs sm:text-sm bg-[#E85D88] hover:bg-[#C73866] text-white shadow-md shadow-[#E85D88]/25 transition-all duration-200 flex items-center gap-1.5 active:scale-95 hover:scale-[1.02]"
+                          className="px-5 py-3 rounded-2xl font-black text-xs sm:text-sm bg-gradient-to-r from-[#E85D88] to-[#FB7185] hover:from-[#C73866] hover:to-[#E85D88] text-white shadow-md shadow-[#E85D88]/25 transition-all duration-200 flex items-center gap-2 active:scale-95 hover:scale-[1.03]"
                         >
                           <Plus className="w-4 h-4" />
                           <span>Adicionar</span>

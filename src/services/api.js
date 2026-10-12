@@ -411,37 +411,430 @@ async function request(endpoint, options = {}) {
   return {};
 }
 
+import { getSupabase } from './supabase';
+
 export const api = {
   // Settings
-  getSettings: () => request('/settings'),
-  updateSettings: (data) => request('/settings', { method: 'POST', body: JSON.stringify(data) }),
+  getSettings: async () => {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        const { data, error } = await sb.from('store_settings').select('*').eq('id', 'main').single();
+        if (!error && data) {
+          return {
+            storeName: data.store_name,
+            sellerPhone: data.seller_phone,
+            adminPassword: data.admin_password,
+            pixKey: data.pix_key,
+            deliveryFee: Number(data.delivery_fee),
+            estimatedDeliveryTime: data.estimated_delivery_time,
+            isOpen: Boolean(data.is_open),
+            businessHours: data.business_hours,
+            closedMessage: data.closed_message,
+            categories: data.categories || ['Tradicionais', 'Especiais', 'Premium', 'Frutas']
+          };
+        }
+      } catch (err) {
+        console.warn('Erro ao consultar Supabase store_settings, usando fallback:', err);
+      }
+    }
+    return request('/settings');
+  },
+
+  updateSettings: async (data) => {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        const payload = {
+          id: 'main',
+          store_name: data.storeName,
+          seller_phone: data.sellerPhone,
+          admin_password: data.adminPassword,
+          pix_key: data.pixKey,
+          delivery_fee: Number(data.deliveryFee) || 0,
+          estimated_delivery_time: data.estimatedDeliveryTime,
+          is_open: Boolean(data.isOpen),
+          business_hours: data.businessHours,
+          closed_message: data.closedMessage,
+          categories: data.categories,
+          updated_at: new Date().toISOString()
+        };
+        const { error } = await sb.from('store_settings').upsert(payload);
+        if (!error) return { success: true, settings: data };
+      } catch (err) {
+        console.warn('Erro ao atualizar Supabase store_settings, usando fallback:', err);
+      }
+    }
+    return request('/settings', { method: 'POST', body: JSON.stringify(data) });
+  },
 
   // Products
-  getProducts: () => request('/products'),
-  createProduct: (data) => request('/products', { method: 'POST', body: JSON.stringify(data) }),
-  updateProduct: (id, data) => request(`/products/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  adjustStock: (id, delta, reason) => request(`/products/${id}/stock`, {
-    method: 'PATCH',
-    body: JSON.stringify({ delta, reason })
-  }),
-  deleteProduct: (id) => request(`/products/${id}`, { method: 'DELETE' }),
+  getProducts: async () => {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: true });
+        if (!error && data) {
+          return data.map(p => ({
+            id: p.id,
+            name: p.name,
+            description: p.description,
+            price: Number(p.price),
+            stock: Number(p.stock),
+            image: p.image,
+            category: p.category,
+            active: p.active !== false
+          }));
+        }
+      } catch (err) {
+        console.warn('Erro ao buscar produtos no Supabase, usando fallback:', err);
+      }
+    }
+    return request('/products');
+  },
+
+  createProduct: async (data) => {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        const newProduct = {
+          id: 'p_' + Date.now(),
+          name: data.name,
+          description: data.description || '',
+          price: Number(data.price),
+          stock: Number(data.stock) || 0,
+          image: data.image || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80',
+          category: data.category || 'Tradicionais',
+          active: true,
+          created_at: new Date().toISOString()
+        };
+        const { error } = await sb.from('products').insert([newProduct]);
+        if (!error) {
+          // Registrar histórico
+          await sb.from('stock_history').insert([{
+            id: 'hist_' + Date.now(),
+            timestamp: new Date().toISOString(),
+            type: 'ENTRY',
+            product_id: newProduct.id,
+            product_name: newProduct.name,
+            quantity_delta: newProduct.stock,
+            new_stock: newProduct.stock,
+            reason: 'Cadastro do produto com estoque inicial'
+          }]).catch(() => {});
+          return newProduct;
+        }
+      } catch (err) {
+        console.warn('Erro ao criar produto no Supabase, usando fallback:', err);
+      }
+    }
+    return request('/products', { method: 'POST', body: JSON.stringify(data) });
+  },
+
+  updateProduct: async (id, data) => {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        const payload = {
+          name: data.name,
+          description: data.description,
+          price: Number(data.price),
+          stock: Number(data.stock),
+          image: data.image,
+          category: data.category,
+          active: data.active
+        };
+        const { error } = await sb.from('products').update(payload).eq('id', id);
+        if (!error) return { id, ...data };
+      } catch (err) {
+        console.warn('Erro ao atualizar produto no Supabase, usando fallback:', err);
+      }
+    }
+    return request(`/products/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+  },
+
+  adjustStock: async (id, delta, reason) => {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        const { data: prod } = await sb.from('products').select('*').eq('id', id).single();
+        if (prod) {
+          const newStock = Math.max(0, Number(prod.stock) + Number(delta));
+          const actualDelta = newStock - Number(prod.stock);
+          await sb.from('products').update({ stock: newStock }).eq('id', id);
+          await sb.from('stock_history').insert([{
+            id: 'hist_' + Date.now(),
+            timestamp: new Date().toISOString(),
+            type: actualDelta >= 0 ? 'ENTRY' : 'EXIT',
+            product_id: prod.id,
+            product_name: prod.name,
+            quantity_delta: actualDelta,
+            new_stock: newStock,
+            reason: reason || (actualDelta > 0 ? 'Acréscimo manual (+)' : 'Redução manual (-)')
+          }]).catch(() => {});
+          return { ...prod, stock: newStock };
+        }
+      } catch (err) {
+        console.warn('Erro ao ajustar estoque no Supabase, usando fallback:', err);
+      }
+    }
+    return request(`/products/${id}/stock`, {
+      method: 'PATCH',
+      body: JSON.stringify({ delta, reason })
+    });
+  },
+
+  deleteProduct: async (id) => {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        const { error } = await sb.from('products').delete().eq('id', id);
+        if (!error) return { success: true };
+      } catch (err) {
+        console.warn('Erro ao deletar produto no Supabase, usando fallback:', err);
+      }
+    }
+    return request(`/products/${id}`, { method: 'DELETE' });
+  },
 
   // Orders
-  getOrders: () => request('/orders'),
-  createOrder: (data) => request('/orders', { method: 'POST', body: JSON.stringify(data) }),
-  updateOrderStatus: (id, status) => request(`/orders/${id}/status`, {
-    method: 'PATCH',
-    body: JSON.stringify({ status })
-  }),
-  deleteOrder: (id) => request(`/orders/${id}`, { method: 'DELETE' }),
-  clearAllOrders: () => request('/orders', { method: 'DELETE' }),
+  getOrders: async () => {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        const { data, error } = await sb.from('orders').select('*').order('created_at', { ascending: false });
+        if (!error && data) {
+          return data.map(o => ({
+            id: o.id,
+            createdAt: o.created_at,
+            customer: o.customer,
+            items: o.items,
+            paymentMethod: o.payment_method,
+            notes: o.notes,
+            subtotal: Number(o.subtotal),
+            deliveryFee: Number(o.delivery_fee),
+            total: Number(o.total),
+            status: o.status
+          }));
+        }
+      } catch (err) {
+        console.warn('Erro ao buscar pedidos no Supabase, usando fallback:', err);
+      }
+    }
+    return request('/orders');
+  },
+
+  createOrder: async (data) => {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        const now = new Date();
+        const orderId = 'PED-' + Math.floor(1000 + Math.random() * 9000);
+        const { items, customer, paymentMethod, notes, deliveryFee } = data;
+
+        // Atualizar estoque no Supabase
+        for (const it of items) {
+          const { data: prod } = await sb.from('products').select('*').eq('id', it.productId).single();
+          if (prod) {
+            const nextStock = Math.max(0, Number(prod.stock) - Number(it.quantity));
+            await sb.from('products').update({ stock: nextStock }).eq('id', prod.id);
+            await sb.from('stock_history').insert([{
+              id: 'hist_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+              timestamp: now.toISOString(),
+              type: 'EXIT',
+              product_id: prod.id,
+              product_name: prod.name,
+              quantity_delta: -it.quantity,
+              new_stock: nextStock,
+              reason: `Saída automática - Pedido #${orderId}`
+            }]).catch(() => {});
+          }
+        }
+
+        const subtotal = items.reduce((acc, it) => acc + (it.price * it.quantity), 0);
+        const fee = Number(deliveryFee) || 0;
+        const total = subtotal + fee;
+
+        const newOrder = {
+          id: orderId,
+          created_at: now.toISOString(),
+          customer,
+          items,
+          payment_method: paymentMethod || 'PIX',
+          notes: notes || '',
+          subtotal,
+          delivery_fee: fee,
+          total,
+          status: 'Novo'
+        };
+
+        const { error } = await sb.from('orders').insert([newOrder]);
+        if (!error) {
+          return {
+            success: true,
+            order: {
+              ...newOrder,
+              createdAt: newOrder.created_at,
+              paymentMethod: newOrder.payment_method,
+              deliveryFee: newOrder.delivery_fee
+            }
+          };
+        }
+      } catch (err) {
+        console.warn('Erro ao criar pedido no Supabase, usando fallback:', err);
+      }
+    }
+    return request('/orders', { method: 'POST', body: JSON.stringify(data) });
+  },
+
+  updateOrderStatus: async (id, status) => {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        const { data: oldOrder } = await sb.from('orders').select('*').eq('id', id).single();
+        if (oldOrder && status === 'Cancelado' && oldOrder.status !== 'Cancelado') {
+          // Restaurar estoque
+          for (const it of (oldOrder.items || [])) {
+            const { data: prod } = await sb.from('products').select('*').eq('id', it.productId).single();
+            if (prod) {
+              const restoredStock = Number(prod.stock) + Number(it.quantity);
+              await sb.from('products').update({ stock: restoredStock }).eq('id', prod.id);
+              await sb.from('stock_history').insert([{
+                id: 'hist_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                timestamp: new Date().toISOString(),
+                type: 'ENTRY',
+                product_id: prod.id,
+                product_name: prod.name,
+                quantity_delta: it.quantity,
+                new_stock: restoredStock,
+                reason: `Devolução ao estoque por cancelamento #${id}`
+              }]).catch(() => {});
+            }
+          }
+        }
+        const { error } = await sb.from('orders').update({ status }).eq('id', id);
+        if (!error) return { success: true, order: { id, status } };
+      } catch (err) {
+        console.warn('Erro ao atualizar status do pedido no Supabase, usando fallback:', err);
+      }
+    }
+    return request(`/orders/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status })
+    });
+  },
+
+  deleteOrder: async (id) => {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        const { error } = await sb.from('orders').delete().eq('id', id);
+        if (!error) return { success: true };
+      } catch (err) {
+        console.warn('Erro ao deletar pedido no Supabase, usando fallback:', err);
+      }
+    }
+    return request(`/orders/${id}`, { method: 'DELETE' });
+  },
+
+  clearAllOrders: async () => {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        const { error } = await sb.from('orders').delete().neq('id', '___non_existent___');
+        if (!error) return { success: true };
+      } catch (err) {
+        console.warn('Erro ao limpar pedidos no Supabase, usando fallback:', err);
+      }
+    }
+    return request('/orders', { method: 'DELETE' });
+  },
 
   // Dashboard & Audit
-  getDashboard: () => request('/dashboard'),
-  getStockHistory: () => request('/stock-history'),
+  getDashboard: async () => {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        const [ordersRes, prodsRes] = await Promise.all([
+          sb.from('orders').select('*'),
+          sb.from('products').select('*')
+        ]);
+        if (!ordersRes.error && !prodsRes.error) {
+          const orders = ordersRes.data || [];
+          const products = prodsRes.data || [];
+          const now = new Date();
+          const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+          const nonCancelled = orders.filter(o => o.status !== 'Cancelado');
+          const salesToday = nonCancelled
+            .filter(o => new Date(o.created_at) >= startOfToday)
+            .reduce((sum, o) => sum + Number(o.total || 0), 0);
+          const salesWeek = nonCancelled
+            .filter(o => new Date(o.created_at) >= sevenDaysAgo)
+            .reduce((sum, o) => sum + Number(o.total || 0), 0);
+          const salesMonth = nonCancelled
+            .filter(o => new Date(o.created_at) >= startOfMonth)
+            .reduce((sum, o) => sum + Number(o.total || 0), 0);
+
+          const pendingOrders = orders.filter(o => o.status === 'Novo' || o.status === 'Em preparo').length;
+          const lowStockProducts = products.filter(p => Number(p.stock) < 5);
+
+          return {
+            salesToday,
+            salesWeek,
+            salesMonth,
+            pendingOrders,
+            totalOrders: orders.length,
+            lowStockCount: lowStockProducts.length,
+            lowStockProducts
+          };
+        }
+      } catch (err) {
+        console.warn('Erro ao calcular dashboard no Supabase, usando fallback:', err);
+      }
+    }
+    return request('/dashboard');
+  },
+
+  getStockHistory: async () => {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        const { data, error } = await sb.from('stock_history').select('*').order('timestamp', { ascending: false }).limit(50);
+        if (!error && data) {
+          return data.map(h => ({
+            id: h.id,
+            timestamp: h.timestamp,
+            type: h.type,
+            productId: h.product_id,
+            productName: h.product_name,
+            quantityDelta: h.quantity_delta,
+            newStock: h.new_stock,
+            reason: h.reason
+          }));
+        }
+      } catch (err) {
+        console.warn('Erro ao carregar histórico no Supabase, usando fallback:', err);
+      }
+    }
+    return request('/stock-history');
+  },
 
   // Clear demo fake data (orders and history)
-  clearDemoData: () => request('/clean-data', { method: 'POST' }),
+  clearDemoData: async () => {
+    const sb = getSupabase();
+    if (sb) {
+      try {
+        await sb.from('orders').delete().neq('id', '___none___');
+        await sb.from('stock_history').delete().neq('id', '___none___');
+        return { success: true };
+      } catch (err) {
+        console.warn('Erro ao limpar dados no Supabase, usando fallback:', err);
+      }
+    }
+    return request('/clean-data', { method: 'POST' });
+  },
 
   // Reset to default seed data if needed
   resetData: () => {

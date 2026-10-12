@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Save, KeyRound, Phone, Store, DollarSign, Clock, Check, AlertCircle, RefreshCw, Tag, Plus, X, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react';
+import { Save, KeyRound, Phone, Store, DollarSign, Clock, Check, AlertCircle, RefreshCw, Tag, Plus, X, ToggleLeft, ToggleRight, Trash2, Database, Globe, CheckCircle2 } from 'lucide-react';
 import { api } from '../../services/api';
+import { isSupabaseActive, setSupabaseCredentials } from '../../services/supabase';
 
 export default function AdminSettings() {
   const [formData, setFormData] = useState({
@@ -15,6 +16,10 @@ export default function AdminSettings() {
     closedMessage: 'Segunda-feira: Fechado para produção artesanal',
     categories: ['Tradicionais', 'Especiais', 'Premium', 'Frutas']
   });
+
+  const [supabaseUrl, setSupabaseUrl] = useState(localStorage.getItem('amor_supabase_url') || '');
+  const [supabaseAnonKey, setSupabaseAnonKey] = useState(localStorage.getItem('amor_supabase_anon_key') || '');
+  const [supabaseConnected, setSupabaseConnected] = useState(isSupabaseActive());
 
   const [newCatInput, setNewCatInput] = useState('');
   const [loading, setLoading] = useState(true);
@@ -93,6 +98,12 @@ export default function AdminSettings() {
     setErrorMessage('');
 
     try {
+      // Salvar credenciais do Supabase
+      if (supabaseUrl && supabaseAnonKey) {
+        setSupabaseCredentials(supabaseUrl, supabaseAnonKey);
+        setSupabaseConnected(true);
+      }
+
       await api.updateSettings({
         ...formData,
         deliveryFee: parseFloat(formData.deliveryFee) || 0
@@ -377,8 +388,75 @@ export default function AdminSettings() {
               />
             </div>
           </div>
+        </div>
 
-          <div className="pt-4 border-t border-[#F5E6DC] flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* SEÇÃO 4: CONEXÃO COM BANCO DE DADOS EM NUVEM (SUPABASE) */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#F5E6DC] shadow-sm space-y-5">
+          <div className="flex items-center justify-between pb-3 border-b border-[#F5E6DC]">
+            <div className="flex items-center gap-2">
+              <Database className="w-5 h-5 text-[#E86A8D]" />
+              <div>
+                <h2 className="font-extrabold text-base text-[#3D2314]">
+                  Banco de Dados em Nuvem (Supabase) ☁️
+                </h2>
+                <p className="text-xs text-[#8C5338]">
+                  Sincronização em tempo real para que qualquer cliente veja as alterações do cardápio instantaneamente
+                </p>
+              </div>
+            </div>
+
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black ${
+              supabaseConnected
+                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                : 'bg-amber-50 text-amber-800 border border-amber-200'
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${supabaseConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+              <span>{supabaseConnected ? 'Nuvem Conectada' : 'Modo Offline / Local'}</span>
+            </span>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-[#FFFDF9] border border-[#F5E6DC] text-xs text-[#6B3A2A] space-y-2">
+            <p className="font-bold flex items-center gap-1.5 text-[#3D2314]">
+              <Globe className="w-4 h-4 text-[#E86A8D]" />
+              <span>Como conectar seu Supabase gratuito:</span>
+            </p>
+            <ol className="list-decimal pl-4 space-y-1">
+              <li>Crie um projeto grátis no <strong>supabase.com</strong>.</li>
+              <li>Vá em <strong>SQL Editor</strong> e execute o script disponibilizado em <code>supabase-schema.sql</code>.</li>
+              <li>Em <strong>Project Settings ➔ API</strong>, copie a <strong>Project URL</strong> e a <strong>anon key</strong> e cole abaixo.</li>
+            </ol>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-[#8C5338] mb-1.5">
+                Supabase Project URL
+              </label>
+              <input
+                type="text"
+                value={supabaseUrl}
+                onChange={(e) => setSupabaseUrl(e.target.value)}
+                placeholder="https://xyzcompany.supabase.co"
+                className="w-full px-4 py-2.5 rounded-xl border border-[#F5E6DC] text-sm focus:outline-none focus:ring-2 focus:ring-[#E86A8D]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[#8C5338] mb-1.5">
+                Supabase Anon / Public Key
+              </label>
+              <input
+                type="password"
+                value={supabaseAnonKey}
+                onChange={(e) => setSupabaseAnonKey(e.target.value)}
+                placeholder="eyJhbGciOiJIUzI1NiIsInR5..."
+                className="w-full px-4 py-2.5 rounded-xl border border-[#F5E6DC] text-sm focus:outline-none focus:ring-2 focus:ring-[#E86A8D]"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl p-6 border border-[#F5E6DC] shadow-sm">
             <div className="flex flex-wrap items-center gap-4">
               <button
                 type="button"
@@ -408,8 +486,7 @@ export default function AdminSettings() {
               <span>Salvar Todas as Configurações</span>
             </button>
           </div>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
   );
 }
